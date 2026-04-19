@@ -9,95 +9,136 @@ const deploymentUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL
 
 export default async function Home() {
   const cookieStore = await cookies()
-
   const orgId = cookieStore.get('org_id')?.value
   if (!orgId) redirect('/login')
 
   const sessionRaw = cookieStore.get('session_user')?.value
   const session = sessionRaw ? JSON.parse(sessionRaw) : null
-
   const isBeta = cookieStore.get('org_is_beta')?.value === 'true'
 
+  const buildColor = isBeta
+    ? { badge: 'bg-amber-100 text-amber-700 border-amber-200', ring: 'ring-amber-200', card: 'bg-amber-50 border-amber-200', title: 'text-amber-800', sub: 'text-amber-600', dot: 'bg-amber-400' }
+    : { badge: 'bg-emerald-100 text-emerald-700 border-emerald-200', ring: 'ring-emerald-200', card: 'bg-emerald-50 border-emerald-200', title: 'text-emerald-800', sub: 'text-emerald-600', dot: 'bg-emerald-400' }
+
   return (
-    <main className="min-h-screen bg-white text-gray-900 flex flex-col">
+    <main className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
       {isBeta && <CanaryBanner />}
 
-      {/* Top nav */}
-      <nav className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-        <span className="font-semibold text-gray-800">Zamp</span>
-        <div className="flex items-center gap-3 text-sm text-gray-500">
-          <span>{session?.name} · {session?.org_name}</span>
+      {/* Navbar */}
+      <nav className="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-slate-900 flex items-center justify-center">
+            <span className="text-white text-xs font-bold">Z</span>
+          </div>
+          <span className="font-semibold text-slate-800 text-sm">Zamp</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="text-right hidden sm:block">
+            <p className="text-xs font-medium text-slate-700">{session?.name}</p>
+            <p className="text-[11px] text-slate-400">{session?.org_name}</p>
+          </div>
+          <div className="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center text-xs font-semibold text-slate-600">
+            {session?.name?.[0] ?? '?'}
+          </div>
           <LogoutButton />
         </div>
       </nav>
 
-      <div className="flex-1 flex flex-col items-center justify-center gap-8 p-8">
+      {/* Main content */}
+      <div className="flex-1 flex flex-col items-center justify-center gap-6 px-4 py-12">
+
         {/* Build badge */}
-        <div className={`px-4 py-2 rounded-full text-sm font-semibold tracking-wide ${
-          isBeta
-            ? 'bg-amber-100 text-amber-800 border border-amber-300'
-            : 'bg-green-100 text-green-800 border border-green-300'
-        }`}>
-          {isBeta ? '🐦 CANARY BUILD' : '✅ STABLE BUILD'}
+        <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold border ${buildColor.badge}`}>
+          <span className={`w-1.5 h-1.5 rounded-full ${buildColor.dot} animate-pulse`} />
+          {isBeta ? 'Canary Build' : 'Stable Build'}
         </div>
 
-        <h1 className="text-4xl font-bold text-center">
-          {isBeta ? 'You are on the Canary Build' : 'You are on the Stable Build'}
-        </h1>
+        {/* Hero */}
+        <div className="text-center space-y-2 max-w-md">
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+            {isBeta ? 'You are on the Canary Build' : 'You are on the Stable Build'}
+          </h1>
+          <p className="text-slate-500 text-sm leading-relaxed">
+            {isBeta
+              ? 'Your org is enrolled in the beta programme. You automatically receive the latest unreleased features ahead of everyone else.'
+              : 'Your org is on the production-stable build. All features here are fully tested and ready for everyone.'}
+          </p>
+        </div>
 
-        <p className="text-gray-500 text-center max-w-md">
-          {isBeta
-            ? 'Your org is enrolled in the beta programme. You automatically get the latest unreleased features.'
-            : 'Your org is on the stable build. All features here are fully tested and production-ready.'}
-        </p>
-
-        {/* Feature panel */}
-        <div className={`w-full max-w-sm rounded-2xl p-6 border-2 text-center ${
-          isBeta ? 'bg-amber-50 border-amber-300' : 'bg-blue-50 border-blue-200'
-        }`}>
-          <p className="text-xs uppercase tracking-widest font-semibold text-gray-400 mb-2">Feature Panel</p>
+        {/* Feature card */}
+        <div className={`w-full max-w-sm rounded-2xl border p-6 ${buildColor.card}`}>
+          <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-3">Feature Panel</p>
           {isBeta ? (
-            <>
-              <p className="text-2xl font-bold text-amber-700">Dashboard v2</p>
-              <p className="text-sm text-amber-600 mt-1">Redesigned analytics, live metrics, AI summaries.</p>
-            </>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-amber-200 flex items-center justify-center text-amber-700 text-sm">📊</div>
+                <div>
+                  <p className="text-sm font-semibold text-amber-800">Dashboard v2</p>
+                  <p className="text-xs text-amber-600">Redesigned analytics</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-amber-200 flex items-center justify-center text-amber-700 text-sm">⚡</div>
+                <div>
+                  <p className="text-sm font-semibold text-amber-800">Live Metrics</p>
+                  <p className="text-xs text-amber-600">Real-time data streaming</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-amber-200 flex items-center justify-center text-amber-700 text-sm">🤖</div>
+                <div>
+                  <p className="text-sm font-semibold text-amber-800">AI Summaries</p>
+                  <p className="text-xs text-amber-600">Coming soon to stable</p>
+                </div>
+              </div>
+            </div>
           ) : (
-            <>
-              <p className="text-2xl font-bold text-blue-700">Dashboard v1</p>
-              <p className="text-sm text-blue-600 mt-1">Reliable, battle-tested.</p>
-            </>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-emerald-200 flex items-center justify-center text-emerald-700 text-sm">📈</div>
+                <div>
+                  <p className="text-sm font-semibold text-emerald-800">Dashboard v1</p>
+                  <p className="text-xs text-emerald-600">Battle-tested analytics</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-emerald-200 flex items-center justify-center text-emerald-700 text-sm">🔒</div>
+                <div>
+                  <p className="text-sm font-semibold text-emerald-800">Stable & Reliable</p>
+                  <p className="text-xs text-emerald-600">Fully production-ready</p>
+                </div>
+              </div>
+            </div>
           )}
         </div>
 
-        {/* Build version info */}
-        <div className="w-full max-w-sm rounded-xl border border-gray-100 bg-gray-50 p-4 text-xs font-mono text-gray-500 space-y-1">
-          <div className="flex justify-between">
-            <span className="text-gray-400">build</span>
-            <span className={isBeta ? 'text-amber-600 font-bold' : 'text-green-600 font-bold'}>
-              {isBeta ? 'canary' : 'stable'}
-            </span>
+        {/* Build metadata */}
+        <div className="w-full max-w-sm rounded-xl bg-white border border-slate-200 overflow-hidden shadow-sm">
+          <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-100">
+            <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-400">Build Info</p>
           </div>
-          <div className="flex justify-between">
-            <span className="text-gray-400">org_id</span>
-            <span>{orgId}</span>
-          </div>
-          {commitSha && (
-            <div className="flex justify-between">
-              <span className="text-gray-400">commit</span>
-              <span>{commitSha}</span>
-            </div>
-          )}
-          {branch && (
-            <div className="flex justify-between">
-              <span className="text-gray-400">branch</span>
-              <span>{branch}</span>
-            </div>
-          )}
-          <div className="flex justify-between gap-4">
-            <span className="text-gray-400 shrink-0">deployment</span>
-            <span className="truncate text-right">{deploymentUrl}</span>
+          <div className="divide-y divide-slate-100">
+            {[
+              { label: 'Build',      value: isBeta ? 'canary' : 'stable', highlight: true },
+              { label: 'Org ID',     value: orgId },
+              ...(commitSha ? [{ label: 'Commit', value: commitSha }] : []),
+              ...(branch    ? [{ label: 'Branch', value: branch }]    : []),
+              { label: 'Deployment', value: deploymentUrl, mono: true },
+            ].map(({ label, value, highlight, mono }) => (
+              <div key={label} className="flex items-center justify-between px-4 py-2.5 gap-4">
+                <span className="text-xs text-slate-400 shrink-0">{label}</span>
+                <span className={`text-xs truncate text-right font-medium ${
+                  highlight
+                    ? isBeta ? 'text-amber-600' : 'text-emerald-600'
+                    : mono ? 'font-mono text-slate-500' : 'text-slate-700'
+                }`}>
+                  {value}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
+
       </div>
     </main>
   )
