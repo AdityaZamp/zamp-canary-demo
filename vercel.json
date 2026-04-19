@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/(.*)",
-      "has": [{ "type": "cookie", "key": "canary", "value": "true" }],
+      "has": [{ "type": "cookie", "key": "org_is_beta", "value": "true" }],
       "destination": "https://zamp-canary-preview.vercel.app/$1"
     }
   ]
