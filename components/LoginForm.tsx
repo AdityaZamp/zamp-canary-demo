@@ -2,6 +2,11 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
+import { Loader2, Mail, AlertCircle } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 export default function LoginForm() {
   const router = useRouter()
@@ -27,62 +32,44 @@ export default function LoginForm() {
       return
     }
 
+    const data = await res.json()
+    toast.success(`Welcome, ${data.name}!`, { description: data.org_name })
     router.push('/')
     router.refresh()
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4"
-    >
-      <div className="space-y-1.5">
-        <label htmlFor="email" className="block text-sm font-medium text-slate-700">
-          Work email
-        </label>
-        <input
-          id="email"
-          type="email"
-          required
-          autoFocus
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          placeholder="you@company.com"
-          className={`
-            w-full rounded-lg border px-3.5 py-2.5 text-sm text-slate-900
-            placeholder:text-slate-400
-            outline-none transition-all
-            ${error
-              ? 'border-red-300 bg-red-50 focus:border-red-400 focus:ring-2 focus:ring-red-100'
-              : 'border-slate-300 bg-white focus:border-slate-500 focus:ring-2 focus:ring-slate-100'
-            }
-          `}
-        />
+    <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-5">
+      <div className="space-y-2">
+        <Label htmlFor="email" className="text-slate-700">Work email</Label>
+        <div className="relative">
+          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400 pointer-events-none" />
+          <Input
+            id="email"
+            type="email"
+            required
+            autoFocus
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            placeholder="you@company.com"
+            aria-invalid={!!error}
+            className={`pl-9 placeholder:text-slate-400 text-slate-900 h-10
+              ${error ? 'border-red-400 focus-visible:ring-red-200 bg-red-50' : ''}
+            `}
+          />
+        </div>
         {error && (
-          <p className="flex items-center gap-1.5 text-xs text-red-600 mt-1">
-            <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-            </svg>
+          <p className="flex items-start gap-1.5 text-xs text-red-600">
+            <AlertCircle className="size-3.5 mt-0.5 shrink-0" />
             {error}
           </p>
         )}
       </div>
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="relative w-full rounded-lg bg-slate-900 py-2.5 text-sm font-semibold text-white
-          hover:bg-slate-700 active:bg-slate-800 disabled:opacity-60
-          transition-colors duration-150 flex items-center justify-center gap-2"
-      >
-        {loading && (
-          <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-          </svg>
-        )}
+      <Button type="submit" disabled={loading} className="w-full h-10 cursor-pointer">
+        {loading ? <Loader2 className="size-4 animate-spin" /> : null}
         {loading ? 'Signing in…' : 'Continue with email'}
-      </button>
+      </Button>
     </form>
   )
 }
